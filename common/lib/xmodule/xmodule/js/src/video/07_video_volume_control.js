@@ -47,7 +47,7 @@ function() {
             // Youtube iframe react on key buttons and has his own handlers.
             // So, we disallow focusing on iframe.
             this.state.el.find('iframe').attr('tabindex', -1);
-            this.button = this.el.children('a');
+            this.button = this.el.children('button');
             this.cookie = new CookieManager(this.min, this.max);
             this.a11y = new Accessibility(
                 this.button, this.min, this.max, this.i18n
@@ -90,8 +90,8 @@ function() {
                 'volumechange': this.onVolumeChangeHandler.bind(this)
             });
             this.el.on({
-                'mouseenter': this.openMenu.bind(this),
-                'mouseleave': this.closeMenu.bind(this)
+                'mouseenter': this.openMenu.bind(this)
+                // 'mouseleave': this.closeMenu.bind(this)
             });
             this.button.on({
                 'click': false,
@@ -100,6 +100,9 @@ function() {
                 'focus': this.openMenu.bind(this),
                 'blur': this.closeMenu.bind(this)
             });
+            $(document).on({
+                'click': this.closeMenu.bind(this)
+            })
         },
 
         /**
@@ -194,9 +197,16 @@ function() {
          * @param {Boolean} isMuted Flag to use muted or unmuted view.
          */
         updateMuteButtonView: function(isMuted) {
-            var action = isMuted ? 'addClass' : 'removeClass';
+            var action = isMuted ? 'addClass' : 'removeClass',
+                icon = isMuted ? 'fa-volume-off' : 'fa-volume-up';
 
             this.el[action]('is-muted');
+
+            this.el
+                .find('.fa')
+                    .removeClass('fa-volume-up')
+                    .removeClass('fa-volume-off')
+                    .addClass(icon);
         },
 
         /** Toggles the state of the volume button. */
@@ -221,12 +231,19 @@ function() {
 
         /** Opens volume menu. */
         openMenu: function() {
-            this.el.addClass('is-opened');
+            $(document).find('.menu.is-opened')
+                .removeClass('is-opened');
+
+            this.el
+                .find('.menu')
+                    .addClass('is-opened');
         },
 
         /** Closes speed menu. */
         closeMenu: function() {
-            this.el.removeClass('is-opened');
+            this.el
+                .find('.menu')
+                    .removeClass('is-opened');
         },
 
         /**
