@@ -5,12 +5,14 @@ Helper functions and classes for discussion tests.
 from uuid import uuid4
 import json
 
+from ...fixtures import LMS_BASE_URL
+from ...fixtures.course import CourseFixture
 from ...fixtures.discussion import (
     SingleThreadViewFixture,
     Thread,
     Response,
 )
-from ...fixtures import LMS_BASE_URL
+from ...tests.helpers import UniqueCourseTest
 
 
 class BaseDiscussionMixin(object):
@@ -83,3 +85,15 @@ class CohortTestMixin(object):
         data = {"users": username}
         response = course_fixture.session.post(url, data=data, headers=course_fixture.headers)
         self.assertTrue(response.ok, "Failed to add user to cohort")
+
+
+class BaseDiscussionTestCase(UniqueCourseTest):
+    def setUp(self):
+        super(BaseDiscussionTestCase, self).setUp()
+
+        self.discussion_id = "test_discussion_{}".format(uuid4().hex)
+        self.course_fixture = CourseFixture(**self.course_info)
+        self.course_fixture.add_advanced_settings(
+            {'discussion_topics': {'value': {'Test Discussion Topic': {'id': self.discussion_id}}}}
+        )
+        self.course_fixture.install()
