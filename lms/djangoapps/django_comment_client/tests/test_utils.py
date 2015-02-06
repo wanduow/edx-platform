@@ -5,7 +5,6 @@ from pytz import UTC
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from django.test.utils import override_settings
 from edxmako import add_lookup
 import mock
 
@@ -15,7 +14,7 @@ from django_comment_client.tests.utils import ContentGroupTestCase
 import django_comment_client.utils as utils
 from student.tests.factories import UserFactory, CourseEnrollmentFactory
 from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
-from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase, TEST_DATA_MOCK_MODULESTORE
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
 
 class DictionaryTestCase(TestCase):
