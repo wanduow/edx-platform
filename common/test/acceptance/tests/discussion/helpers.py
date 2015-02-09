@@ -12,6 +12,7 @@ from ...fixtures.discussion import (
     Thread,
     Response,
 )
+from ...pages.lms.discussion import DiscussionTabSingleThreadPage
 from ...tests.helpers import UniqueCourseTest
 
 
@@ -97,3 +98,10 @@ class BaseDiscussionTestCase(UniqueCourseTest):
             {'discussion_topics': {'value': {'Test Discussion Topic': {'id': self.discussion_id}}}}
         )
         self.course_fixture.install()
+
+    def create_single_thread_page(self, thread_id):
+        """
+        Sets up a `DiscussionTabSingleThreadPage` for a given
+        `thread_id`.
+        """
+        return DiscussionTabSingleThreadPage(self.browser, self.course_id, self.discussion_id, thread_id)

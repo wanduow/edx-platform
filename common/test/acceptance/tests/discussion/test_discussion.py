@@ -150,7 +150,7 @@ class DiscussionTabSingleThreadTest(BaseDiscussionTestCase, DiscussionResponsePa
         AutoAuthPage(self.browser, course_id=self.course_id).visit()
 
     def setup_thread_page(self, thread_id):
-        self.thread_page = DiscussionTabSingleThreadPage(self.browser, self.course_id, self.discussion_id, thread_id)  # pylint: disable=attribute-defined-outside-init
+        self.thread_page = self.create_single_thread_page(thread_id)  # pylint: disable=attribute-defined-outside-init
         self.thread_page.visit()
 
     def test_marked_answer_comments(self):
@@ -204,7 +204,7 @@ class DiscussionOpenClosedThreadTest(BaseDiscussionTestCase):
             self.setup_view(closed=True)
         else:
             self.setup_view()
-        page = DiscussionTabSingleThreadPage(self.browser, self.course_id, self.discussion_id, self.thread_id)
+        page = self.create_single_thread_page(self.thread_id)
         page.visit()
         page.close_open_thread()
         return page
@@ -243,9 +243,7 @@ class DiscussionCommentDeletionTest(BaseDiscussionTestCase):
     def test_comment_deletion_as_student(self):
         self.setup_user()
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "comment_deletion_test_thread"
-        )
+        page = self.create_single_thread_page("comment_deletion_test_thread")
         page.visit()
         self.assertTrue(page.is_comment_deletable("comment_self_author"))
         self.assertTrue(page.is_comment_visible("comment_other_author"))
@@ -255,9 +253,7 @@ class DiscussionCommentDeletionTest(BaseDiscussionTestCase):
     def test_comment_deletion_as_moderator(self):
         self.setup_user(roles=['Moderator'])
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "comment_deletion_test_thread"
-        )
+        page = self.create_single_thread_page("comment_deletion_test_thread")
         page.visit()
         self.assertTrue(page.is_comment_deletable("comment_self_author"))
         self.assertTrue(page.is_comment_deletable("comment_other_author"))
@@ -302,9 +298,7 @@ class DiscussionResponseEditTest(BaseDiscussionTestCase):
         """
         self.setup_user()
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "response_edit_test_thread"
-        )
+        page = self.create_single_thread_page("response_edit_test_thread")
         page.visit()
         self.assertTrue(page.is_response_visible("response_other_author"))
         self.assertFalse(page.is_response_editable("response_other_author"))
@@ -321,9 +315,7 @@ class DiscussionResponseEditTest(BaseDiscussionTestCase):
         """
         self.setup_user(roles=["Moderator"])
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "response_edit_test_thread"
-        )
+        page = self.create_single_thread_page("response_edit_test_thread")
         page.visit()
         self.edit_response(page, "response_self_author")
         self.edit_response(page, "response_other_author")
@@ -351,9 +343,7 @@ class DiscussionResponseEditTest(BaseDiscussionTestCase):
         """
         self.setup_user(roles=["Moderator"])
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "response_edit_test_thread"
-        )
+        page = self.create_single_thread_page("response_edit_test_thread")
         page.visit()
         self.edit_response(page, "response_self_author")
         self.edit_response(page, "response_other_author")
@@ -390,9 +380,7 @@ class DiscussionCommentEditTest(BaseDiscussionTestCase):
     def test_edit_comment_as_student(self):
         self.setup_user()
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "comment_edit_test_thread"
-        )
+        page = self.create_single_thread_page("comment_edit_test_thread")
         page.visit()
         self.assertTrue(page.is_comment_editable("comment_self_author"))
         self.assertTrue(page.is_comment_visible("comment_other_author"))
@@ -402,9 +390,7 @@ class DiscussionCommentEditTest(BaseDiscussionTestCase):
     def test_edit_comment_as_moderator(self):
         self.setup_user(roles=["Moderator"])
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "comment_edit_test_thread"
-        )
+        page = self.create_single_thread_page("comment_edit_test_thread")
         page.visit()
         self.assertTrue(page.is_comment_editable("comment_self_author"))
         self.assertTrue(page.is_comment_editable("comment_other_author"))
@@ -414,9 +400,7 @@ class DiscussionCommentEditTest(BaseDiscussionTestCase):
     def test_cancel_comment_edit(self):
         self.setup_user()
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "comment_edit_test_thread"
-        )
+        page = self.create_single_thread_page("comment_edit_test_thread")
         page.visit()
         self.assertTrue(page.is_comment_editable("comment_self_author"))
         original_body = page.get_comment_body("comment_self_author")
@@ -428,9 +412,7 @@ class DiscussionCommentEditTest(BaseDiscussionTestCase):
         """Only one editor should be visible at a time within a single response"""
         self.setup_user(roles=["Moderator"])
         self.setup_view()
-        page = DiscussionTabSingleThreadPage(
-            self.browser, self.course_id, self.discussion_id, "comment_edit_test_thread"
-        )
+        page = self.create_single_thread_page("comment_edit_test_thread")
         page.visit()
         self.assertTrue(page.is_comment_editable("comment_self_author"))
         self.assertTrue(page.is_comment_editable("comment_other_author"))
