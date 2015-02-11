@@ -70,22 +70,20 @@ def make_course_settings(course, user):
 
 
 @newrelic.agent.function_trace()
-def get_threads(request, course_key, discussion_id=None, per_page=THREADS_PER_PAGE):
+def get_threads(request, course, discussion_id=None, per_page=THREADS_PER_PAGE):
     """
     This may raise an appropriate subclass of cc.utils.CommentClientError
     if something goes wrong, or ValueError if the group_id is invalid.
     """
-    course = get_course_with_access(request.user, 'load_forum', course_key)
-
     default_query_params = {
         'page': 1,
         'per_page': per_page,
         'sort_key': 'date',
         'sort_order': 'desc',
         'text': '',
-        'course_id': course_key.to_deprecated_string(),
+        'course_id': unicode(course.id),
         'user_id': request.user.id,
-        'group_id': get_group_id_for_comments_service(request, course_key, discussion_id),  # may raise ValueError
+        'group_id': get_group_id_for_comments_service(request, course.id, discussion_id),  # may raise ValueError
     }
 
     if discussion_id is not None:
@@ -172,7 +170,7 @@ def inline_discussion(request, course_key, discussion_id):
     user_info = cc_user.to_dict()
 
     try:
-        threads, query_params = get_threads(request, course_key, discussion_id, per_page=INLINE_THREADS_PER_PAGE)
+        threads, query_params = get_threads(request, course, discussion_id, per_page=INLINE_THREADS_PER_PAGE)
     except ValueError:
         return HttpResponseBadRequest("Invalid group_id")
 
@@ -209,7 +207,7 @@ def forum_form_discussion(request, course_key):
     user_info = user.to_dict()
 
     try:
-        unsafethreads, query_params = get_threads(request, course_key)   # This might process a search query
+        unsafethreads, query_params = get_threads(request, course)   # This might process a search query
         is_staff = cached_has_permission(request.user, 'openclose_thread', course.id)
         threads = [utils.prepare_content(thread, course_key, is_staff) for thread in unsafethreads]
     except cc.utils.CommentClientMaintenanceError:
@@ -317,7 +315,7 @@ def single_thread(request, course_key, discussion_id, thread_id):
 
     else:
         try:
-            threads, query_params = get_threads(request, course_key)
+            threads, query_params = get_threads(request, course)
         except ValueError:
             return HttpResponseBadRequest("Invalid group_id")
         threads.append(thread.to_dict())
