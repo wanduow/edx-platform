@@ -27,6 +27,9 @@ describe 'StudentAdmin', ->
     it 'binds to the btn_rescore_entrance_exam on click event', =>
       expect(studentadmin.$btn_rescore_entrance_exam).toHandle 'click'
 
+    it 'binds to the $btn_skip_entrance_exam on click event', =>
+      expect(studentadmin.$btn_skip_entrance_exam).toHandle 'click'
+
     it 'binds to the $btn_entrance_exam_task_history on click event', =>
       expect(studentadmin.$btn_entrance_exam_task_history).toHandle 'click'
 
@@ -105,6 +108,41 @@ describe 'StudentAdmin', ->
 
       studentadmin.$field_entrance_exam_student_select_grade.val(unique_student_identifier)
       studentadmin.$btn_rescore_entrance_exam.click()
+      expect(studentadmin.$request_response_error_ee.text()).toEqual(full_error_message)
+
+    it 'binds skip entrance exam ajax call and the result will be success', =>
+      studentadmin.$btn_skip_entrance_exam.click()
+      expect(studentadmin.$request_response_error_ee.text()).toEqual(
+        gettext("Please enter a student email address or username.")
+      )
+
+      spyOn($, "ajax").andCallFake((params) =>
+        params.success({})
+      )
+      alert_msg = ''
+      spyOn(window, 'alert').andCallFake((message) =>
+        alert_msg = message
+      )
+
+      unique_student_identifier = "john@example.com"
+      success_message = gettext("Student '{student_id}' is marked to skip entrance exam.")
+      full_success_message = interpolate_text(success_message, {student_id: unique_student_identifier})
+
+      studentadmin.$field_entrance_exam_student_select_grade.val(unique_student_identifier)
+      studentadmin.$btn_skip_entrance_exam.click()
+      expect(alert_msg).toEqual(full_success_message)
+
+    it 'binds skip entrance exam ajax call and the result will be error', =>
+      spyOn($, "ajax").andCallFake((params) =>
+        params.error({})
+      )
+
+      unique_student_identifier = "invalid_user"
+      error_message = gettext("Error marking student '{student_id}' to skip entrance exam.. Make sure student identifier is correct.")
+      full_error_message = interpolate_text(error_message, {student_id: unique_student_identifier})
+
+      studentadmin.$field_entrance_exam_student_select_grade.val(unique_student_identifier)
+      studentadmin.$btn_skip_entrance_exam.click()
       expect(studentadmin.$request_response_error_ee.text()).toEqual(full_error_message)
 
     it 'binds delete student state for entrance exam ajax call and the result will be success', =>

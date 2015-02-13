@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from courseware.access import has_access
-from student.models import CourseEnrollment
+from student.models import CourseEnrollment, user_can_skip_entrance_exam
 from xmodule.tabs import CourseTabList
 
 if settings.FEATURES.get('MILESTONES_APP', False):
@@ -40,7 +40,7 @@ def get_course_tab_list(course, user):
             for __, value in course_milestones_paths.iteritems():
                 if len(value.get('content', [])):
                     for content in value['content']:
-                        if content == course.entrance_exam_id:
+                        if content == course.entrance_exam_id and not user_can_skip_entrance_exam(user, course.id):
                             entrance_exam_mode = True
                             break
 

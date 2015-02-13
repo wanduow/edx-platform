@@ -157,6 +157,20 @@ def user_by_anonymous_id(uid):
         return None
 
 
+def user_can_skip_entrance_exam(user, course_key):
+    """
+    Return True if given user can skip entrance exam for given course otherwise False.
+    """
+    can_skip = False
+    if settings.FEATURES.get('ENTRANCE_EXAMS', False):
+        try:
+            record = EntranceExamConfiguration.objects.get(user=user, course_id=course_key)
+            can_skip = record.skip_entrance_exam
+        except EntranceExamConfiguration.DoesNotExist:
+            can_skip = False
+    return can_skip
+
+
 class UserStanding(models.Model):
     """
     This table contains a student's account's status.
@@ -1467,3 +1481,29 @@ class LinkedInAddToProfileConfiguration(ConfigurationModel):
 
     def __unicode__(self):
         return self.dashboard_tracking_code
+
+
+class EntranceExamConfiguration(models.Model):
+    """
+    Represents a Student's entrance exam specific data for a single Course
+    """
+
+    user = models.ForeignKey(User, db_index=True)
+    course_id = CourseKeyField(max_length=255, db_index=True)
+    created = models.DateTimeField(auto_now_add=True, null=True, db_index=True)
+    updated = models.DateTimeField(auto_now=True, db_index=True)
+
+    # if skip_entrance_exam is True, then student can skip entrance exam
+    # for the course
+    skip_entrance_exam = models.BooleanField(default=True)
+
+    class Meta(object):
+        """
+        Meta class to make user and course_id unique in the table
+        """
+        unique_together = (('user', 'course_id'), )
+
+    def __unicode__(self):
+        return "[EntranceExamConfiguration] %s: %s (%s) = %s" % (
+            self.user, self.course_id, self.created, self.skip_entrance_exam
+        )
