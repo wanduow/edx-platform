@@ -91,3 +91,4 @@ class SettingsPage(CoursePage):
                 lambda: self.q(css='body.view-settings').present,
                 'Page is refreshed'
             ).fulfill()
+        self.wait_for_ajax()
