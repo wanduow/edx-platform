@@ -704,12 +704,11 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
                     new_module_data
                 )
 
-            # This code supports lazy loading, where the descendent definitions aren't loaded
+            # This method supports lazy loading, where the descendent definitions aren't loaded
             # until they're actually needed.
-            # However, assume that depth == 0 means no depth is specified and depth != 0 means
-            # a depth *is* specified. If a non-zero depth is specified, force non-lazy definition
+            # However, if a specific, non-None depth is specified, override the lazy definition
             # loading in order to populate the definition cache for later access.
-            load_definitions_now = depth != 0 or not lazy
+            load_definitions_now = depth != None or not lazy
             if load_definitions_now:
                 # Non-lazy loading: Load all descendants by id.
                 descendent_definitions = self.get_definitions(
