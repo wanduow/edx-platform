@@ -2,6 +2,7 @@ import json
 import logging
 
 import ddt
+from django.core import cache
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test.client import Client, RequestFactory
@@ -302,15 +303,21 @@ class SingleThreadQueryCountTestCase(ModuleStoreTestCase):
 
     @ddt.data(
         # old mongo: number of responses plus 16.  TODO: O(n)!
-        (ModuleStoreEnum.Type.mongo, 1, 18),
-        (ModuleStoreEnum.Type.mongo, 50, 67),
+        (ModuleStoreEnum.Type.mongo, 1, 23, 18),
+        (ModuleStoreEnum.Type.mongo, 50, 366, 67),
         # split mongo: 3 queries, regardless of thread response size.
-        (ModuleStoreEnum.Type.split, 1, 3),
-        (ModuleStoreEnum.Type.split, 50, 3),
+        (ModuleStoreEnum.Type.split, 1, 3, 3),
+        (ModuleStoreEnum.Type.split, 50, 3, 3),
     )
     @ddt.unpack
-    def test_number_of_mongo_queries(self, default_store, num_thread_responses, num_mongo_calls, mock_request):
-
+    def test_number_of_mongo_queries(
+            self,
+            default_store,
+            num_thread_responses,
+            num_uncached_mongo_calls,
+            num_cached_mongo_calls,
+            mock_request
+    ):
         with modulestore().default_store(default_store):
             course = CourseFactory.create(discussion_topics={'dummy discussion': {'id': 'dummy_discussion_id'}})
 
@@ -328,7 +335,11 @@ class SingleThreadQueryCountTestCase(ModuleStoreTestCase):
             HTTP_X_REQUESTED_WITH="XMLHttpRequest"
         )
         request.user = student
-        with check_mongo_calls(num_mongo_calls):
+
+        def call_single_thread():
+            """
+            Call single_thread and assert that it returns what we expect.
+            """
             response = views.single_thread(
                 request,
                 course.id.to_deprecated_string(),
@@ -337,6 +348,27 @@ class SingleThreadQueryCountTestCase(ModuleStoreTestCase):
             )
             self.assertEquals(response.status_code, 200)
             self.assertEquals(len(json.loads(response.content)["content"]["children"]), num_thread_responses)
+
+        # TODO: update this once django cache is disabled in tests
+        # Test with and without cache, clearing before and after use.
+        single_thread_local_cache = cache.get_cache(
+            backend='default',
+            LOCATION='single_thread_local_cache'
+        )
+        single_thread_dummy_cache = cache.get_cache(
+            backend='django.core.cache.backends.dummy.DummyCache',
+            LOCATION='single_thread_local_cache'
+        )
+        cached_calls = {
+            single_thread_dummy_cache: num_uncached_mongo_calls,
+            single_thread_local_cache: num_cached_mongo_calls
+        }
+        for single_thread_cache, expected_calls in cached_calls.items():
+            single_thread_cache.clear()
+            with patch("django_comment_client.permissions.CACHE", single_thread_cache):
+                with check_mongo_calls(expected_calls):
+                    call_single_thread()
+            single_thread_cache.clear()
 
 
 @patch('requests.request')
