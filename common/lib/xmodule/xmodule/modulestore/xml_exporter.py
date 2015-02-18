@@ -41,7 +41,7 @@ def export_to_xml(modulestore, contentstore, course_key, root_dir, course_dir):
 
     with modulestore.bulk_operations(course_key):
 
-        course = modulestore.get_course(course_key, depth=None)  # None means infinite
+        course = modulestore.get_course(course_key, depth=None, lazy=False)  # depth=None means infinite
         fsm = OSFS(root_dir)
         export_fs = course.runtime.export_fs = fsm.makeopendir(course_dir)
         root_course_dir = root_dir + '/' + course_dir

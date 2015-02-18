@@ -423,11 +423,13 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
                     ids.remove(definition_id)
                     definitions.append(definition)
 
-        # Query the db for the definitions.
-        defs_from_db = self.db_connection.get_definitions(list(ids))
-        # Add the retrieved definitions to the cache.
-        bulk_write_record.definitions.update({d.get('_id'): d for d in defs_from_db})
-        definitions.extend(defs_from_db)
+        ids = list(ids)
+        if len(ids):
+            # Query the db for the definitions.
+            defs_from_db = self.db_connection.get_definitions(list(ids))
+            # Add the retrieved definitions to the cache.
+            bulk_write_record.definitions.update({d.get('_id'): d for d in defs_from_db})
+            definitions.extend(defs_from_db)
         return definitions
 
     def update_definition(self, course_key, definition):
@@ -706,10 +708,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
 
             # This method supports lazy loading, where the descendent definitions aren't loaded
             # until they're actually needed.
-            # However, if a specific, non-None depth is specified, override the lazy definition
-            # loading in order to populate the definition cache for later access.
-            load_definitions_now = depth != None or not lazy
-            if load_definitions_now:
+            if not lazy:
                 # Non-lazy loading: Load all descendants by id.
                 descendent_definitions = self.get_definitions(
                     course_key,
@@ -733,7 +732,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
             return system.module_data
 
     @contract(course_entry=CourseEnvelope, block_keys="list(BlockKey)", depth="int | None")
-    def _load_items(self, course_entry, block_keys, depth=0, lazy=True, **kwargs):
+    def _load_items(self, course_entry, block_keys, depth=0, **kwargs):
         '''
         Load & cache the given blocks from the course. May return the blocks in any order.
 
@@ -742,6 +741,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
         '''
         runtime = self._get_cache(course_entry.structure['_id'])
         if runtime is None:
+            lazy = kwargs.pop('lazy', True)
             runtime = self.create_runtime(course_entry, lazy)
             self._add_cache(course_entry.structure['_id'], runtime)
             self.cache_items(runtime, block_keys, course_entry.course_key, depth, lazy)
@@ -863,7 +863,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
             locator = locator_factory(structure_info, branch)
             envelope = CourseEnvelope(locator, entry)
             root = entry['root']
-            structures_list = self._load_items(envelope, [root], 0, lazy=True, **kwargs)
+            structures_list = self._load_items(envelope, [root], depth=0, **kwargs)
             if not isinstance(structures_list[0], ErrorDescriptor):
                 result.append(structures_list[0])
         return result
@@ -928,7 +928,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
         """
         structure_entry = self._lookup_course(structure_id)
         root = structure_entry.structure['root']
-        result = self._load_items(structure_entry, [root], depth, lazy=True, **kwargs)
+        result = self._load_items(structure_entry, [root], depth, **kwargs)
         return result[0]
 
     def get_course(self, course_id, depth=0, **kwargs):
@@ -1016,7 +1016,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
 
         with self.bulk_operations(usage_key.course_key):
             course = self._lookup_course(usage_key.course_key)
-            items = self._load_items(course, [BlockKey.from_usage_key(usage_key)], depth, lazy=True, **kwargs)
+            items = self._load_items(course, [BlockKey.from_usage_key(usage_key)], depth, **kwargs)
             if len(items) == 0:
                 raise ItemNotFoundError(usage_key)
             elif len(items) > 1:
@@ -1077,7 +1077,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
                 if block_name == block_id.id and _block_matches_all(block):
                     block_ids.append(block_id)
 
-            return self._load_items(course, block_ids, lazy=True, **kwargs)
+            return self._load_items(course, block_ids, **kwargs)
 
         if 'category' in qualifiers:
             qualifiers['block_type'] = qualifiers.pop('category')
@@ -1090,7 +1090,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
                 items.append(block_id)
 
         if len(items) > 0:
-            return self._load_items(course, items, 0, lazy=True, **kwargs)
+            return self._load_items(course, items, depth=0, **kwargs)
         else:
             return []
 

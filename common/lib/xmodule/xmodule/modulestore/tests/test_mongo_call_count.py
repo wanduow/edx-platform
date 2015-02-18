@@ -88,13 +88,19 @@ class CountMongoCallsCourseTraversal(TestCase):
     """
 
     @ddt.data(
-        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, 189),  # The way this traversal *should* be done.
-        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, 387),     # The pathological case - do *not* query a course this way!
-        (MIXED_SPLIT_MODULESTORE_BUILDER, None, 7),  # The way this traversal *should* be done.
-        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, 145)    # The pathological case - do *not* query a course this way!
+        # The way this traversal *should* be done (if you'll eventually load all the definitions anyway).
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, False, 189),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, True, 189),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, False, 387),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, True, 387),  # The pathological case - do *not* traverse a course this way!
+        # The way this traversal *should* be done (if you'll eventually load all the definitions anyway).
+        (MIXED_SPLIT_MODULESTORE_BUILDER, None, False, 4),
+        (MIXED_SPLIT_MODULESTORE_BUILDER, None, True, 4),
+        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, False, 143),  # The pathological case - do *not* traverse a course this way!
+        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, True, 4)
     )
     @ddt.unpack
-    def test_number_mongo_calls(self, store, depth, num_mongo_calls):
+    def test_number_mongo_calls(self, store, depth, lazy, num_mongo_calls):
         with store.build() as (source_content, source_store):
 
             source_course_key = source_store.make_course_key('a', 'course', 'course')
@@ -116,10 +122,11 @@ class CountMongoCallsCourseTraversal(TestCase):
             # Starting at the root course block, do a breadth-first traversal using
             # get_children() to retrieve each block's children.
             with check_mongo_calls(num_mongo_calls):
-                start_block = source_store.get_course(source_course_key, depth=depth)
-                stack = [start_block]
-                while stack:
-                    curr_block = stack.pop()
-                    if curr_block.has_children:
-                        for block in reversed(curr_block.get_children()):
-                            stack.append(block)
+                with source_store.bulk_operations(source_course_key):
+                    start_block = source_store.get_course(source_course_key, depth=depth, lazy=lazy)
+                    stack = [start_block]
+                    while stack:
+                        curr_block = stack.pop()
+                        if curr_block.has_children:
+                            for block in reversed(curr_block.get_children()):
+                                stack.append(block)
