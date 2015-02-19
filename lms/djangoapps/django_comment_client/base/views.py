@@ -18,7 +18,6 @@ from opaque_keys.edx.locations import SlashSeparatedCourseKey
 
 from courseware.access import has_access
 from edx_notifications.lib.publisher import (
-    register_notification_type,
     publish_notification_to_user,
     get_notification_type
 )
