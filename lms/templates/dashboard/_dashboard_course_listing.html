@@ -106,7 +106,7 @@ from student.helpers import (
 
     <section class="info" id="${course.number}">
       <div class="course-item-info">
-        <h3>
+        <h3 class="course-title">
           % if show_courseware_link:
              % if not is_course_blocked:
             <a href="${course_target}">${course.display_number_with_default | h} ${course.display_name_with_default}</a>
@@ -117,6 +117,7 @@ from student.helpers import (
             <span>${course.display_number_with_default | h} ${course.display_name_with_default}</span>
           % endif
         </h3>
+        <p alt="university" class="university">${get_course_about_section(course, 'university')}</p>
         <p class="date-block">
         % if course.has_ended():
         ${_("Course Completed - {end_date}").format(end_date=course.end_datetime_text("DATE_TIME"))}
@@ -128,7 +129,6 @@ from student.helpers import (
         ${_("Course Starts - {start_date}").format(start_date=course.start_datetime_text("DATE_TIME"))}
         % endif
         </p>
-        <p alt="university" class="university">${get_course_about_section(course, 'university')}</p>
       </div>
 
       % if course.may_certify() and cert_status:
@@ -220,19 +220,20 @@ from student.helpers import (
         </p>
       %endif
 
+      <div class="course-actions">
       % if show_courseware_link:
         % if course.has_ended():
-         % if not is_course_blocked:
+          % if not is_course_blocked:
           <a href="${course_target}" class="enter-course archived">${_('View Archived Course')}</a>
-        % else:
-          <a class="enter-course-blocked archived">${_('View Archived Course')}</a>
-        % endif
-        % else:
-        % if not is_course_blocked:
-          <a href="${course_target}" class="enter-course">${_('View Course')}</a>
-        % else:
-          <a class="enter-course-blocked">${_('View Course')}</a>
-        % endif
+          % else:
+            <a class="enter-course-blocked archived">${_('View Archived Course')}</a>
+          % endif
+          % else:
+          % if not is_course_blocked:
+            <a href="${course_target}" class="enter-course">${_('View Course')}</a>
+          % else:
+            <a class="enter-course-blocked">${_('View Course')}</a>
+          % endif
         % endif
       % endif
 
@@ -301,7 +302,7 @@ from student.helpers import (
         % endif
       % endif
 
-% if show_email_settings:
+      % if show_email_settings:
         % if not is_course_blocked:
         <a href="#email-settings-modal" class="email-settings" rel="leanModal" data-course-id="${course.id | h}" data-course-number="${course.number | h}" data-optout="${unicode(course.id) in course_optouts}">${_('Email Settings')} <span class="sr">${_('for {course_number} {course_name}').format(course_number=course.number, course_name=course.display_name_with_default) |h}</span></a>
         % else:
@@ -309,7 +310,8 @@ from student.helpers import (
           ${_('Email Settings')} <span class="sr">${_('for {course_number} {course_name}').format(course_number=course.number, course_name=course.display_name_with_default) |h}</span>
         </a>
         % endif
-% endif
+      % endif
+      </div>
 
 
 

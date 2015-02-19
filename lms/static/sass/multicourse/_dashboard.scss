@@ -384,41 +384,42 @@
         @include clearfix();
         @include padding(0, 10px, 0, 230px);
 
-         .course-item-info {
-          padding: 0;
+        .course-item-info {
+          position: relative;
           width: 100%;
+          padding: 0;
+
+          .course-title {
+            margin-top: -($baseline/2);
+
+            a,
+            span {
+              display: block;
+              margin-bottom: ($baseline/3);
+              font-family: $sans-serif;
+              font-size: 34px;
+              line-height: 42px;
+              font-weight: 300;
+
+              &:hover,
+              &:focus {
+                text-decoration: none;
+              }
+            }
+          }
+
+          .university,
+          .date-block {
+            @extend %t-copy-sub1;
+            margin: 0 0 6px;
+          }
 
           .university {
-            color: $lighter-base-font-color;
-            font-family: $sans-serif;
-            font-size: 16px;
-            font-weight: 400;
-            margin: 0 0 6px;
-            text-transform: none;
-            letter-spacing: 0;
+            @extend %t-strong;
           }
 
           .date-block {
-            top: 0;
-            @include right(0);
-            font-family: $sans-serif;
-            font-size: 13px;
-            font-style: italic;
             color: $lighter-base-font-color;
-            float: right;
-          }
-
-          h3 a, h3 span {
-            display: block;
-            margin-bottom: ($baseline/2);
-            font-family: $sans-serif;
-            font-size: 34px;
-            line-height: 42px;
-            font-weight: 300;
-
-            &:hover, &:focus {
-              text-decoration: none;
-            }
           }
         }
 
@@ -452,6 +453,10 @@
               font-weight: bold;
             }
           }
+        }
+
+        .course-actions {
+          @include clearfix();
         }
 
         .enter-course {
