@@ -92,11 +92,13 @@ class CountMongoCallsCourseTraversal(TestCase):
         (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, False, 189),
         (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, True, 189),
         (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, False, 387),
-        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, True, 387),  # The pathological case - do *not* traverse a course this way!
+        # The pathological case - do *not* traverse a course this way!
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, True, 387),
         # The way this traversal *should* be done (if you'll eventually load all the definitions anyway).
         (MIXED_SPLIT_MODULESTORE_BUILDER, None, False, 4),
         (MIXED_SPLIT_MODULESTORE_BUILDER, None, True, 4),
-        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, False, 143),  # The pathological case - do *not* traverse a course this way!
+        # The pathological case - do *not* traverse a course this way!
+        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, False, 143),
         (MIXED_SPLIT_MODULESTORE_BUILDER, 0, True, 4)
     )
     @ddt.unpack
