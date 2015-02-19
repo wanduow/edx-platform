@@ -1,8 +1,8 @@
 define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpers/template_helpers',
         'js/groups/views/cohorts', 'js/groups/collections/cohort', 'js/groups/models/content_group',
-        'js/groups/models/cohort_settings'],
+        'js/groups/models/course_cohort_settings', 'js/groups/views/course_cohort_settings_notification'],
     function (Backbone, $, AjaxHelpers, TemplateHelpers, CohortsView, CohortCollection, ContentGroupModel,
-              CohortSettingsModel) {
+              CourseCohortSettingsModel, CourseCohortSettingsNotificationView) {
         'use strict';
 
         describe("Cohorts View", function () {
@@ -53,7 +53,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
             };
 
             createCohortSettings = function (isCohorted, cohortedDiscussions, alwaysCohortInlineDiscussions) {
-                return new CohortSettingsModel({
+                return new CourseCohortSettingsModel({
                     id: 0,
                     is_cohorted: isCohorted || false,
                     cohorted_discussions: cohortedDiscussions || [],
@@ -191,13 +191,14 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
             };
 
             beforeEach(function () {
-                setFixtures('<ul class="instructor-nav"><li class="nav-item"><<a href data-section="cohort_management" class="active-section">Cohort Management</a></li></ul><div></div>');
+                setFixtures('<ul class="instructor-nav"><li class="nav-item"><<a href data-section="cohort_management" class="active-section">Cohort Management</a></li></ul><div></div><div class="cohort-state-message"></div>');
                 TemplateHelpers.installTemplate('templates/instructor/instructor_dashboard_2/cohorts');
                 TemplateHelpers.installTemplate('templates/instructor/instructor_dashboard_2/cohort-form');
                 TemplateHelpers.installTemplate('templates/instructor/instructor_dashboard_2/cohort-selector');
                 TemplateHelpers.installTemplate('templates/instructor/instructor_dashboard_2/cohort-editor');
                 TemplateHelpers.installTemplate('templates/instructor/instructor_dashboard_2/cohort-group-header');
                 TemplateHelpers.installTemplate('templates/instructor/instructor_dashboard_2/notification');
+                TemplateHelpers.installTemplate('templates/instructor/instructor_dashboard_2/cohort-state');
                 TemplateHelpers.installTemplate('templates/file-upload');
             });
 

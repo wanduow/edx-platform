@@ -1,7 +1,7 @@
 var edx = edx || {};
 
 (function($, _, Backbone, gettext, interpolate_text, CohortModel, CohortEditorView, CohortFormView,
-          CohortStateMessageView, NotificationModel, NotificationView, FileUploaderView) {
+          CourseCohortSettingsNotificationView, NotificationModel, NotificationView, FileUploaderView) {
     'use strict';
 
     var hiddenClass = 'is-hidden',
@@ -44,7 +44,6 @@ var edx = edx || {};
                 cohortsEnabled: this.cohortSettings.get('is_cohorted')
             }));
             this.onSync();
-            this.renderCohortStateMessageView();
             return this;
         },
 
@@ -55,11 +54,11 @@ var edx = edx || {};
             }));
         },
 
-        renderCohortStateMessageView: function() {
-            var cohortStateMessageView = new CohortStateMessageView({
+        renderCourseCohortSettingsNotificationView: function() {
+            var cohortStateMessageNotificationView = new CourseCohortSettingsNotificationView({
                 el: $('.cohort-state-message'),
-                cohortState: this.getCohortState()});
-            cohortStateMessageView.render();
+                cohortEnabled: this.getCohortState()});
+            cohortStateMessageNotificationView.render();
         },
 
         onSync: function(model, response, options) {
@@ -123,6 +122,7 @@ var edx = edx || {};
                 fieldData, {patch: true, wait: true}
             ).done(function() {
                 self.render();
+                self.renderCourseCohortSettingsNotificationView();
             });
         },
 
@@ -274,4 +274,5 @@ var edx = edx || {};
         }
     });
 }).call(this, $, _, Backbone, gettext, interpolate_text, edx.groups.CohortModel, edx.groups.CohortEditorView,
-    edx.groups.CohortFormView, edx.groups.CohortStateMessageView, NotificationModel, NotificationView, FileUploaderView);
+    edx.groups.CohortFormView, edx.groups.CourseCohortSettingsNotificationView, NotificationModel, NotificationView,
+    FileUploaderView);

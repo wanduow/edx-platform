@@ -440,7 +440,7 @@ def is_default_cohort(user_group):
     return len(random_cohorts) == 1 and random_cohorts[0].name == user_group.name
 
 
-def set_cohort_state(course_id, is_cohorted):
+def set_course_is_cohorted(course_id, is_cohorted):
     """
     Enable/Disable cohort for a course.
     """
@@ -450,7 +450,7 @@ def set_cohort_state(course_id, is_cohorted):
     return cohort_settings
 
 
-def get_cohort_settings(course_id):
+def get_course_cohort_settings(course_id):
     """
     Return cohort settings for a course.
     """

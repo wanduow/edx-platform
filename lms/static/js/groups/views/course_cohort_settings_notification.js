@@ -5,10 +5,10 @@ var edx = edx || {};
 
     edx.groups = edx.groups || {};
 
-    edx.groups.CohortStateMessageView = Backbone.View.extend({
+    edx.groups.CourseCohortSettingsNotificationView = Backbone.View.extend({
         initialize: function(options) {
             this.template = _.template($('#cohort-state-tpl').text());
-            this.cohortState = options.cohortState;
+            this.cohortEnabled = options.cohortEnabled;
         },
 
         render: function() {
@@ -25,7 +25,7 @@ var edx = edx || {};
             actionToggleMessage.offset().width = actionToggleMessage.offset().width;
             actionToggleMessage.addClass('is-fleeting');
 
-            if (this.cohortState) {
+            if (this.cohortEnabled) {
                 actionToggleMessage.text(gettext('Cohorts Enabled'));
             } else {
                 actionToggleMessage.text(gettext('Cohorts Disabled'));
