@@ -423,7 +423,6 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
                     ids.remove(definition_id)
                     definitions.append(definition)
 
-        ids = list(ids)
         if len(ids):
             # Query the db for the definitions.
             defs_from_db = self.db_connection.get_definitions(list(ids))
