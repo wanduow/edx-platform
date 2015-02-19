@@ -36,7 +36,6 @@ describe 'StudentAdmin', ->
     it 'Expects student task history table to be visible', =>
       expect(studentadmin.$table_entrance_exam_task_history).toBeVisible()
 
-
     it 'binds reset entrance exam ajax call and the result will be success', =>
       studentadmin.$btn_reset_entrance_exam_attempts.click()
       expect(studentadmin.$request_response_error_ee.text()).toEqual(

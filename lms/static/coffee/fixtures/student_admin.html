@@ -2,9 +2,10 @@
 <div class="student-specific-container action-type-container">
   <h2>${_("Student-specific grade inspection")}</h2>
   <div class="request-response-error"></div>
+  <br />
   <label>
   ${_("Specify the {platform_name} email address or username of a student here:").format(platform_name=settings.PLATFORM_NAME)}
-  <input type="text" name="student-select-progress" placeholder="${_('Student Email or Username')}">
+  <input type="text" name="student-select-progress" placeholder="${_("Student Email or Username")}" >
   </label>
   <br>
 
@@ -22,49 +23,55 @@
 <div class="student-grade-container action-type-container">
   <h2>${_("Student-specific grade adjustment")}</h2>
   <div class="request-response-error"></div>
+  <p>
   <label>
   ${_("Specify the {platform_name} email address or username of a student here:").format(platform_name=settings.PLATFORM_NAME)}
-  <input type="text" name="student-select-grade" placeholder="${_('Student Email or Username')}">
+  <input type="text" name="student-select-grade" placeholder="${_("Student Email or Username")}">
   </label>
+  </p>
   <br>
 
   <label> ${_("Specify a problem in the course here with its complete location:")}
-  <input type="text" name="problem-select-single" placeholder="${_('Problem location')}">
+  <input type="text" name="problem-select-single" placeholder="${_("Problem location")}">
   </label>
 
+  ## Translators: A location (string of text) follows this sentence.
   <p>${_("You must provide the complete location of the problem. In the Staff Debug viewer, the location looks like this:")}<br/>
-  </p>
+  <code>i4x://edX/Open_DemoX/problem/78c98390884243b89f6023745231c525</code></p>
 
   <p>
   ${_("Next, select an action to perform for the given user and problem:")}
   </p>
 
-  <label>
-  <input type="button" name="reset-attempts-single" value="${_('Reset Student Attempts')}" data-endpoint="${ section_data['reset_student_attempts_url'] }">
+  <p>
+  <input type="button" name="reset-attempts-single" value="${_("Reset Student Attempts")}" data-endpoint="${ section_data['reset_student_attempts_url'] }">
 
 
-    <input type="button" name="rescore-problem-single" value="${_('Rescore Student Submission')}" data-endpoint="${ section_data['rescore_problem_url'] }">
+    <input type="button" name="rescore-problem-single" value="${_("Rescore Student Submission")}" data-endpoint="${ section_data['rescore_problem_url'] }">
 
-  </label>
+  </p>
 
   <p>
-    <p> ${_('You may also delete the entire state of a student for the specified problem:')} </p>
-    <label><input type="button" class="molly-guard" name="delete-state-single" value="${_('Delete Student State for Problem')}" data-endpoint="${ section_data['reset_student_attempts_url'] }"></label>
+    <label> ${_('You may also delete the entire state of a student for the specified problem:')}
+    <input type="button" class="molly-guard" name="delete-state-single" value="${_("Delete Student State for Problem")}" data-endpoint="${ section_data['reset_student_attempts_url'] }"></label>
+
   </p>
 
 
-    <p>
+
+    <p id="task-history-single-help">
       ${_("Rescoring runs in the background, and status for active tasks will appear in the 'Pending Instructor Tasks' table. "
       "To see status for all tasks submitted for this problem and student, click on this button:")}
     </p>
 
-    <label><input type="button" name="task-history-single" value="${_('Show Background Task History for Student')}" data-endpoint="${ section_data['list_instructor_tasks_url'] }"></label>
+    <p><input type="button" name="task-history-single" value="${_("Show Background Task History for Student")}" data-endpoint="${ section_data['list_instructor_tasks_url'] }" aria-describedby="task-history-single-help"></p>
     <div class="task-history-single-table"></div>
+
   <hr>
 </div>
 
 
-  <div class="entrance-exam-grade-container action-type-container">
+<div class="entrance-exam-grade-container action-type-container">
   <h2>${_("Entrance Exam grade adjustment")}</h2>
   <div class="request-response-error"></div>
   <label>
@@ -77,25 +84,54 @@
   ${_("Next, select an action to perform for the given user's entrance exam grade:")}
   </p>
 
-  <label>
   <input type="button" name="reset-entrance-exam-attempts" value="${_('Reset Student Attempts')}" data-endpoint="${ section_data['reset_student_attempts_for_entrance_exam_url'] }">
+
+
   <input type="button" name="rescore-entrance-exam" value="${_('Rescore Student Submission')}" data-endpoint="${ section_data['rescore_entrance_exam_url'] }">
-  </label>
 
   <p>
-    <p> ${_('You may also delete the entire state of a student for the entrance exam:')} </p>
-    <label><input type="button" class="molly-guard" name="delete-entrance-exam-state" value="${_('Delete Student State for entrance exam')}" data-endpoint="${ section_data['reset_student_attempts_for_entrance_exam_url'] }"></label>
+    <label> ${_('You may also delete the entire state of a student for the entrance exam:')}
+    <input type="button" class="molly-guard" name="delete-entrance-exam-state" value="${_('Delete Student State for entrance exam')}" data-endpoint="${ section_data['reset_student_attempts_for_entrance_exam_url'] }"></label>
+
   </p>
 
-  <p>
-    ${_("Rescoring runs in the background, and status for active tasks will appear in the 'Pending Instructor Tasks' table. "
-    "To see status for all tasks submitted for this problem and student, click on this button:")}
-  </p>
+    <p id="entrance-exam-task-history-help">
+      ${_("Rescoring runs in the background, and status for active tasks will appear in the 'Pending Instructor Tasks' table. "
+      "To see status for all tasks submitted for this problem and student, click on this button:")}
+    </p>
 
-  <label><input type="button" name="entrance-exam-task-history" value="${_('Show Background Task History for Student')}" data-endpoint="${ section_data['list_entrace_exam_instructor_tasks_url'] }"></label>
-  <div class="entrance-exam-task-history-table"></div>
+    <p><input type="button" name="entrance-exam-task-history" value="${_('Show Background Task History for Student')}" data-endpoint="${ section_data['list_entrace_exam_instructor_tasks_url'] }" aria-describedby="entrance-exam-task-history-help"></p>
+    <div class="entrance-exam-task-history-table"></div>
   <hr>
 </div>
+
+
+  <div class="course-specific-container action-type-container">
+    <h2>${_('Course-specific grade adjustment')}</h2>
+    <div class="request-response-error"></div>
+
+    <label>
+      ${_("Specify a problem in the course here with its complete location:")}
+      <input type="text" name="problem-select-all" size="60" placeholder="${_("Problem location")}" aria-describedby="problem-select-all-help">
+    </label>
+    ## Translators: A location (string of text) follows this sentence.
+    <p id="problem-select-all-help">${_("You must provide the complete location of the problem. In the Staff Debug viewer, the location looks like this:")}<br/>
+    <code>i4x://edX/Open_DemoX/problem/78c98390884243b89f6023745231c525</code></p>
+    <p>
+      ${_("Then select an action")}:
+      <input type="button" class="molly-guard" name="reset-attempts-all" value="${_("Reset ALL students' attempts")}" data-endpoint="${ section_data['reset_student_attempts_url'] }">
+      <input type="button" class="molly-guard" name="rescore-problem-all" value="${_("Rescore ALL students' problem submissions")}" data-endpoint="${ section_data['rescore_problem_url'] }">
+    </p>
+    <p>
+    <p id="task-history-all-help">
+      ${_("The above actions run in the background, and status for active tasks will appear in a table on the Course Info tab. "
+      "To see status for all tasks submitted for this problem, click on this button")}:
+    </p>
+      <p><input type="button" name="task-history-all" value="${_("Show Background Task History for Problem")}" data-endpoint="${ section_data['list_instructor_tasks_url'] }" aria-describedby="task-history-all-help"></p>
+      <div class="task-history-all-table"></div>
+    </p>
+  </div>
+
 
   <div class="running-tasks-container action-type-container">
     <hr>
@@ -109,4 +145,4 @@
     <div class="no-pending-tasks-message"></div>
   </div>
 
-</section>>
+</section>

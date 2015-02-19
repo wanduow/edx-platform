@@ -23,11 +23,13 @@ from instructor_task.tasks import (
     cohort_students,
 )
 
-from instructor_task.api_helper import (check_arguments_for_rescoring,
-                                        encode_problem_and_student_input,
-                                        encode_entrance_exam_and_student_input,
-                                        check_entrance_exam_problems_for_rescoring,
-                                        submit_task)
+from instructor_task.api_helper import (
+    check_arguments_for_rescoring,
+    encode_problem_and_student_input,
+    encode_entrance_exam_and_student_input,
+    check_entrance_exam_problems_for_rescoring,
+    submit_task,
+)
 from bulk_email.models import CourseEmail
 
 
