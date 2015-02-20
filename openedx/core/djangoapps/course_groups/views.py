@@ -1,3 +1,7 @@
+"""
+Views related to course groups functionality.
+"""
+
 from django_future.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
@@ -55,7 +59,7 @@ def unlink_cohort_partition_group(cohort):
     """
     CourseUserGroupPartitionGroup.objects.filter(course_user_group=cohort).delete()
 
-
+# pylint: disable=invalid-name
 def _get_course_cohort_settings_representation(course_cohort_settings):
     """
     Returns a JSON representation of a course cohort settings.
@@ -84,7 +88,7 @@ def _get_cohort_representation(cohort, course):
     }
 
 
-@require_http_methods(("GET", "PUT"))
+@require_http_methods(("GET", "PUT", "POST"))
 @ensure_csrf_cookie
 @expect_json
 @login_required
@@ -94,7 +98,7 @@ def course_cohort_settings_handler(request, course_key_string):
     This will raise 404 if user is not staff.
     GET
         Returns the JSON representation of cohort settings for the course.
-    PUT
+    PUT or POST
         Updates the cohort settings for the course. Returns the JSON representation of updated settings.
     """
     course_key = SlashSeparatedCourseKey.from_deprecated_string(course_key_string)

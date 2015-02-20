@@ -10,9 +10,9 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                 createMockCohort, createMockCohorts, createMockContentGroups, createCohortSettings, createCohortsView,
                 cohortsView, requests, respondToRefresh, verifyMessage, verifyNoMessage, verifyDetailedMessage,
                 verifyHeader, expectCohortAddRequest, getAddModal, selectContentGroup, clearContentGroup,
-                saveFormAndExpectErrors, MOCK_COHORTED_USER_PARTITION_ID, MOCK_UPLOAD_COHORTS_CSV_URL,
-                MOCK_STUDIO_ADVANCED_SETTINGS_URL, MOCK_STUDIO_GROUP_CONFIGURATIONS_URL, MOCK_MANUAL_ASSIGNMENT,
-                MOCK_RANDOM_ASSIGNMENT;
+                saveFormAndExpectErrors, createMockCohortSettings, MOCK_COHORTED_USER_PARTITION_ID,
+                MOCK_UPLOAD_COHORTS_CSV_URL, MOCK_STUDIO_ADVANCED_SETTINGS_URL, MOCK_STUDIO_GROUP_CONFIGURATIONS_URL,
+                MOCK_MANUAL_ASSIGNMENT, MOCK_RANDOM_ASSIGNMENT;
 
             MOCK_MANUAL_ASSIGNMENT = 'manual';
             MOCK_RANDOM_ASSIGNMENT = 'random';
@@ -50,6 +50,15 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         id: 1, name: 'Cat Content', user_partition_id: MOCK_COHORTED_USER_PARTITION_ID
                     })
                 ];
+            };
+
+            createMockCohortSettings = function (isCohorted, cohortedDiscussions, alwaysCohortInlineDiscussions) {
+                return {
+                    id: 0,
+                    is_cohorted: isCohorted || false,
+                    cohorted_discussions: cohortedDiscussions || [],
+                    always_cohort_inline_discussions: alwaysCohortInlineDiscussions || true
+                };
             };
 
             createCohortSettings = function (isCohorted, cohortedDiscussions, alwaysCohortInlineDiscussions) {
@@ -268,6 +277,53 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                     cohortsView.$('.cohort-select').val('2').change();
                     verifyHeader(2, 'Dog Lovers', dogLoversInitialCount);
                 });
+            });
+
+            describe("Course Cohort Settings", function () {
+                it('enable/disable working correctly', function () {
+                    createCohortsView(this);
+
+                    // Cohorts Enable checkbox should be unchecked as because it is default.
+                    expect(cohortsView.$('.cohort-state').val()).toBeFalsy();
+
+                    cohortsView.$('.cohort-state').prop('checked', true).change();
+                    AjaxHelpers.expectJsonRequest(
+                        requests, 'PUT', '/mock_service/cohorts/settings',
+                        createMockCohortSettings(true, [], true)
+                    );
+                    AjaxHelpers.respondWithJson(
+                        requests,
+                        createMockCohortSettings(true)
+                    );
+                    expect(cohortsView.$('.cohort-state').val()).toBeTruthy();
+
+                    cohortsView.$('.cohort-state').prop('checked', false).change();
+                    AjaxHelpers.expectJsonRequest(
+                        requests, 'PUT', '/mock_service/cohorts/settings',
+                        createMockCohortSettings(false, [], true)
+                    );
+                    AjaxHelpers.respondWithJson(
+                        requests,
+                        createMockCohortSettings(false)
+                    );
+                    expect(cohortsView.$('.cohort-state').val()).toBeFalsy();
+                });
+
+                it('Course Cohort Settings Notification View renders correctly', function () {
+                     var createCohortStateMessageNotificationView = function (is_cohorted) {
+                        var cohortStateMessageNotificationView = new CourseCohortSettingsNotificationView({
+                            el: $('.cohort-state-message'),
+                            cohortEnabled: is_cohorted});
+                        cohortStateMessageNotificationView.render();
+                     };
+
+                    createCohortStateMessageNotificationView(true);
+                    expect(cohortsView.$('.action-toggle-message').text().trim()).toBe('Cohorts Enabled');
+
+                    createCohortStateMessageNotificationView(false);
+                    expect(cohortsView.$('.action-toggle-message').text().trim()).toBe('Cohorts Disabled');
+                });
+
             });
 
             describe("Cohort Group Header", function () {

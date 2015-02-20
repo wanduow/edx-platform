@@ -5,7 +5,6 @@ forums, and to the cohort admin views.
 
 import logging
 import random
-import json
 
 from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
@@ -16,7 +15,6 @@ from courseware import courses
 from eventtracking import tracker
 from student.models import get_user_by_username_or_email
 from .models import CourseUserGroup, CourseCohort, CourseCohortsSettings, CourseUserGroupPartitionGroup
-from opaque_keys.edx.keys import CourseKey
 
 
 log = logging.getLogger(__name__)

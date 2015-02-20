@@ -142,10 +142,6 @@ class CourseCohortSettingsHandlerTestCase(CohortViewsTestCase):
         cohorted_discussions = ['Topic A', 'Topic B']
         config_course_cohorts(self.course, [], cohorted=True, cohorted_discussions=cohorted_discussions)
 
-        # Get the cohorts from the course. This will run the migrations.
-        # And due to migrations CourseCohortsSettings object will be created.
-        self.get_handler(self.course)
-
         response = self.get_handler(self.course, handler=course_cohort_settings_handler)
         response['cohorted_discussions'].sort()
 
@@ -165,10 +161,6 @@ class CourseCohortSettingsHandlerTestCase(CohortViewsTestCase):
         """
         config_course_cohorts(self.course, [], cohorted=True)
 
-        # Get the cohorts from the course. This will run the migrations.
-        # And due to migrations CourseCohortsSettings object will be created.
-        self.get_handler(self.course)
-
         response = self.get_handler(self.course, handler=course_cohort_settings_handler)
 
         expected_response = {
@@ -177,7 +169,6 @@ class CourseCohortSettingsHandlerTestCase(CohortViewsTestCase):
             'cohorted_discussions': [],
             'id': 1
         }
-
         self.assertEqual(response, expected_response)
 
         expected_response['is_cohorted'] = False

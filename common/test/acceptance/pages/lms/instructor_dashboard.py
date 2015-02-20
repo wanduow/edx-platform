@@ -451,18 +451,13 @@ class CohortManagementSection(PageObject):
         """
         if state != self.is_cohorted:
             self.q(css=self._bounded_selector('.cohorts-state')).first.click()
-            # # Wait until cohort management tools visibility changed
-            # EmptyPromise(
-            #     lambda: self.cohort_management_controls_state() == False,
-            #     "Waiting for messages to appear"
-            # ).fulfill()
 
     def cohort_management_controls_state(self):
         """
         Return the state of cohort management controls(cohort selector section etc).
         """
-        return self.q(css=self._bounded_selector('.cohort-management-nav')).visible and \
-               self.q(css=self._bounded_selector('.wrapper-cohort-supplemental')).visible
+        return (self.q(css=self._bounded_selector('.cohort-management-nav')).visible and
+                self.q(css=self._bounded_selector('.wrapper-cohort-supplemental')).visible)
 
 
 
