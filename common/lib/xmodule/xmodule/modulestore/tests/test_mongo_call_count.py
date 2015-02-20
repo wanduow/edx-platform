@@ -87,22 +87,39 @@ class CountMongoCallsCourseTraversal(TestCase):
     to the leaf nodes.
     """
 
+    # Suppose you want to traverse a course - maybe accessing the fields of each XBlock in the course,
+    # maybe not. What parameters should one use for get_course() in order to minimize the number of
+    # mongo calls? The tests below both ensure that code changes don't increase the number of mongo calls
+    # during traversal -and- demonstrate how to minimize the number of calls.
     @ddt.data(
-        # The way this traversal *should* be done (if you'll eventually load all the definitions anyway).
-        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, False, 189),
-        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, True, 189),
-        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, False, 387),
-        # The pathological case - do *not* traverse a course this way!
-        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, True, 387),
-        # The way this traversal *should* be done (if you'll eventually load all the definitions anyway).
-        (MIXED_SPLIT_MODULESTORE_BUILDER, None, False, 4),
-        (MIXED_SPLIT_MODULESTORE_BUILDER, None, True, 4),
-        # The pathological case - do *not* traverse a course this way!
-        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, False, 143),
-        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, True, 4)
+        # These two lines show the way this traversal *should* be done
+        # (if you'll eventually access all the fields and load all the definitions anyway).
+        # 'lazy' does not matter in old Mongo.
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, False, True, 189),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, True, True, 189),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, False, True, 387),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, True, True, 387),
+        # As shown in these two lines: whether or not the XBlock fields are accessed,
+        # the same number of mongo calls are made in old Mongo for depth=None.
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, False, False, 189),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, None, True, False, 189),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, False, False, 387),
+        (MIXED_OLD_MONGO_MODULESTORE_BUILDER, 0, True, False, 387),
+        # The line below shows the way this traversal *should* be done
+        # (if you'll eventually access all the fields and load all the definitions anyway).
+        (MIXED_SPLIT_MODULESTORE_BUILDER, None, False, True, 4),
+        (MIXED_SPLIT_MODULESTORE_BUILDER, None, True, True, 143),
+        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, False, True, 143),
+        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, True, True, 143),
+        (MIXED_SPLIT_MODULESTORE_BUILDER, None, False, False, 4),
+        (MIXED_SPLIT_MODULESTORE_BUILDER, None, True, False, 4),
+        # TODO: The call count below seems like a bug - should be 4?
+        # Seems to be related to using self.lazy in CachingDescriptorSystem.get_module_data().
+        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, False, False, 143),
+        (MIXED_SPLIT_MODULESTORE_BUILDER, 0, True, False, 4)
     )
     @ddt.unpack
-    def test_number_mongo_calls(self, store, depth, lazy, num_mongo_calls):
+    def test_number_mongo_calls(self, store, depth, lazy, access_all_block_fields, num_mongo_calls):
         with store.build() as (source_content, source_store):
 
             source_course_key = source_store.make_course_key('a', 'course', 'course')
@@ -126,9 +143,19 @@ class CountMongoCallsCourseTraversal(TestCase):
             with check_mongo_calls(num_mongo_calls):
                 with source_store.bulk_operations(source_course_key):
                     start_block = source_store.get_course(source_course_key, depth=depth, lazy=lazy)
+                    all_blocks = []
                     stack = [start_block]
                     while stack:
                         curr_block = stack.pop()
+                        all_blocks.append(curr_block)
                         if curr_block.has_children:
                             for block in reversed(curr_block.get_children()):
                                 stack.append(block)
+
+                    if access_all_block_fields:
+                        # Read the fields on each block in order to ensure each block and its definition is loaded.
+                        for xblock in all_blocks:
+                            for field_name, field in xblock.fields.iteritems():
+                                if field.is_set_on(xblock):
+                                    field_value = field.read_from(xblock)
+

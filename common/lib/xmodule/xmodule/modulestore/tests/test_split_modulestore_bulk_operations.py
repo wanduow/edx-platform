@@ -410,8 +410,7 @@ class TestBulkWriteMixinFindMethods(TestBulkWriteMixin):
             self.conn.get_definitions.assert_called_once_with(definitions_gotten)
         else:
             # If no definitions to get, then get_definitions() should *not* have been called.
-            with self.assertRaises(AssertionError):
-                self.conn.get_definitions.assert_called_with(definitions_gotten)
+            self.assertEquals(self.conn.get_definitions.call_count, 0)
         for _id in active_ids:
             if _id in search_ids:
                 self.assertIn(active_definition(_id), results)
