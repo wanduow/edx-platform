@@ -366,7 +366,8 @@ if settings.COURSEWARE_ENABLED:
 
         # Cohorts management
         url(r'^courses/{}/cohorts/settings$'.format(settings.COURSE_KEY_PATTERN),
-            'openedx.core.djangoapps.course_groups.views.course_cohort_settings_handler', name="course_cohort_settings"),
+            'openedx.core.djangoapps.course_groups.views.course_cohort_settings_handler',
+            name="course_cohort_settings"),
         url(r'^courses/{}/cohorts/(?P<cohort_id>[0-9]+)?$'.format(settings.COURSE_KEY_PATTERN),
             'openedx.core.djangoapps.course_groups.views.cohort_handler', name="cohorts"),
         url(r'^courses/{}/cohorts/(?P<cohort_id>[0-9]+)$'.format(settings.COURSE_KEY_PATTERN),

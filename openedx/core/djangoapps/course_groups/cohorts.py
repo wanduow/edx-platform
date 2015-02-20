@@ -237,7 +237,7 @@ def migrate_cohort_settings(course):
         course_id=course_id,
         defaults={
             'is_cohorted': course.is_cohorted,
-            'cohorted_discussions': json.dumps(list(course.cohorted_discussions)),
+            'cohorted_discussions': list(course.cohorted_discussions),
             'always_cohort_inline_discussions': course.always_cohort_inline_discussions
         }
     )
@@ -440,18 +440,46 @@ def is_default_cohort(user_group):
     return len(random_cohorts) == 1 and random_cohorts[0].name == user_group.name
 
 
-def set_course_is_cohorted(course_id, is_cohorted):
+def set_course_cohort_settings(course_key, **kwargs):
     """
-    Enable/Disable cohort for a course.
+    Set cohort settings for a course.
+
+    Arguments:
+        course_key: CourseKey
+        is_cohorted (bool): If the course should be cohorted.
+        always_cohort_inline_discussions (bool): If inline discussions should always be cohorted.
+        cohorted_discussions (list): List of discussion ids.
+
+    Returns:
+        A CourseCohortSettings object.
+
+    Raises:
+        ValueError if course_key is invalid.
     """
-    cohort_settings = CourseCohortsSettings.objects.get(course_id=CourseKey.from_string(course_id))
-    cohort_settings.is_cohorted = is_cohorted
-    cohort_settings.save()
-    return cohort_settings
+    course_cohort_settings = get_course_cohort_settings(course_key)
+    for field in ('is_cohorted', 'always_cohort_inline_discussions', 'cohorted_discussions'):
+        if field in kwargs:
+            setattr(course_cohort_settings, field, kwargs[field])
+    course_cohort_settings.save()
+    return course_cohort_settings
 
 
-def get_course_cohort_settings(course_id):
+def get_course_cohort_settings(course_key):
     """
     Return cohort settings for a course.
+
+    Arguments:
+        course_key: CourseKey
+
+    Returns:
+        A CourseCohortSettings object.
+
+    Raises:
+        ValueError if course_key is invalid.
     """
-    return CourseCohortsSettings.objects.get(course_id=CourseKey.from_string(course_id))
+    try:
+        course_cohort_settings = CourseCohortsSettings.objects.get(course_id=course_key)
+    except CourseCohortsSettings.DoesNotExist:
+        course = courses.get_course(course_key)
+        course_cohort_settings = migrate_cohort_settings(course)
+    return course_cohort_settings

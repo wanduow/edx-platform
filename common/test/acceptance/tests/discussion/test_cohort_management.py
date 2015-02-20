@@ -447,6 +447,29 @@ class CohortConfigurationTest(UniqueCourseTest, CohortTestMixin):
         message = "There must be one cohort to which students can automatically be assigned."
         self.assertEqual(message, self.cohort_management_page.assignment_settings_message)
 
+    def test_cohort_enable_disable(self):
+        """
+        Scenario: Cohort Enable/Disable checkbox related functionality is working as intended.
+
+        Given I have a cohorted course with a user.
+        And I can see the `Enable Cohorts` checkbox is checked.
+        And cohort management controls are visible.
+        When I uncheck the `Enable Cohorts` checkbox.
+        Then I cohort management controls are not visible.
+        And When I reload the page.
+        Then I can see the `Enable Cohorts` checkbox is unchecked.
+        And cohort management controls are not visible.
+        """
+        self.assertTrue(self.cohort_management_page.is_cohorted)
+        self.assertTrue(self.cohort_management_page.cohort_management_controls_state())
+        self.cohort_management_page.is_cohorted = False
+        self.assertFalse(self.cohort_management_page.cohort_management_controls_state())
+        self.browser.refresh()
+        self.cohort_management_page.wait_for_page()
+        self.assertFalse(self.cohort_management_page.is_cohorted)
+        self.assertFalse(self.cohort_management_page.cohort_management_controls_state())
+
+
     def test_link_to_data_download(self):
         """
         Scenario: a link is present from the cohort configuration in

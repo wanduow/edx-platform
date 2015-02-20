@@ -437,6 +437,34 @@ class CohortManagementSection(PageObject):
         file_input.send_keys(path)
         self.q(css=self._bounded_selector(self.csv_upload_button_selector_css)).first.click()
 
+    @property
+    def is_cohorted(self):
+        """
+        Returns the state of `Enable Cohorts` checkbox state.
+        """
+        return self.q(css=self._bounded_selector('.cohorts-state')).selected
+
+    @is_cohorted.setter
+    def is_cohorted(self, state):
+        """
+        Check/Uncheck the `Enable Cohorts` checkbox state.
+        """
+        if state != self.is_cohorted:
+            self.q(css=self._bounded_selector('.cohorts-state')).first.click()
+            # # Wait until cohort management tools visibility changed
+            # EmptyPromise(
+            #     lambda: self.cohort_management_controls_state() == False,
+            #     "Waiting for messages to appear"
+            # ).fulfill()
+
+    def cohort_management_controls_state(self):
+        """
+        Return the state of cohort management controls(cohort selector section etc).
+        """
+        return self.q(css=self._bounded_selector('.cohort-management-nav')).visible and \
+               self.q(css=self._bounded_selector('.wrapper-cohort-supplemental')).visible
+
+
 
 class MembershipPageAutoEnrollSection(PageObject):
     """

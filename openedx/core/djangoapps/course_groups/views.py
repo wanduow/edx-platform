@@ -9,6 +9,7 @@ from util.json_request import expect_json, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext
 
+import json
 import logging
 import re
 
@@ -83,27 +84,30 @@ def _get_cohort_representation(cohort, course):
     }
 
 
-@require_http_methods(("GET", "PATCH"))
+@require_http_methods(("GET", "PUT"))
 @ensure_csrf_cookie
 @expect_json
 @login_required
 def course_cohort_settings_handler(request, course_key_string):
     """
     The restful handler for cohort setting requests. Requires JSON.
+    This will raise 404 if user is not staff.
     GET
         Returns the JSON representation of cohort settings for the course.
-    PUT or POST or PATCH
+    PUT
         Updates the cohort settings for the course. Returns the JSON representation of updated settings.
     """
+    course_key = SlashSeparatedCourseKey.from_deprecated_string(course_key_string)
+    get_course_with_access(request.user, 'staff', course_key)
     if request.method == 'GET':
-        cohort_settings = cohorts.get_course_cohort_settings(course_key_string)
+        cohort_settings = cohorts.get_course_cohort_settings(course_key)
         return JsonResponse(_get_course_cohort_settings_representation(cohort_settings))
     else:
         is_cohorted = request.json.get('is_cohorted')
         if is_cohorted is None:
             # Note: error message not translated because it is not exposed to the user (UI prevents this state).
             return JsonResponse({"error": "Bad Request"}, 400)
-        cohort_settings = cohorts.set_course_is_cohorted(course_key_string, is_cohorted=is_cohorted)
+        cohort_settings = cohorts.set_course_cohort_settings(course_key, is_cohorted=is_cohorted)
         return JsonResponse(_get_course_cohort_settings_representation(cohort_settings))
 
 

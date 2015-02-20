@@ -119,7 +119,7 @@ var edx = edx || {};
                 fieldData = {is_cohorted: this.getCohortState()};
             cohortSettings = this.cohortSettings;
             cohortSettings.save(
-                fieldData, {patch: true, wait: true}
+                fieldData, {wait: true}
             ).done(function() {
                 self.render();
                 self.renderCourseCohortSettingsNotificationView();
