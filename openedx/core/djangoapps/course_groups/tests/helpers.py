@@ -4,13 +4,14 @@ Helper methods for testing cohorts.
 import factory
 from factory import post_generation, Sequence
 from factory.django import DjangoModelFactory
+import json
+
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore import ModuleStoreEnum
 
-from ..models import CourseUserGroup, CourseCohort, CourseCohortsSettings
-
-import json
+from openedx.core.djangoapps.course_groups.cohorts import get_course_cohort_settings, set_course_cohort_settings
+from openedx.core.djangoapps.course_groups.models import CourseUserGroup, CourseCohort, CourseCohortsSettings
 
 
 class CohortFactory(DjangoModelFactory):
@@ -67,7 +68,7 @@ def topic_name_to_id(course, name):
     )
 
 
-def config_course_cohorts(
+def config_course_cohorts_legacy(
         course,
         discussions,
         cohorted,
@@ -105,7 +106,6 @@ def config_course_cohorts(
     if cohorted_discussions is not None:
         config["cohorted_discussions"] = [to_id(name)
                                           for name in cohorted_discussions]
-
     if auto_cohort_groups is not None:
         config["auto_cohort_groups"] = auto_cohort_groups
 
@@ -114,6 +114,60 @@ def config_course_cohorts(
 
     course.cohort_config = config
 
+    try:
+        # Not implemented for XMLModulestore, which is used by test_cohorts.
+        modulestore().update_item(course, ModuleStoreEnum.UserID.test)
+    except NotImplementedError:
+        pass
+
+
+def config_course_cohorts(
+        course,
+        is_cohorted,
+        auto_cohorts=[],
+        manual_cohorts=[],
+        discussion_topics=[],
+        cohorted_discussions=[],
+        always_cohort_inline_discussions=True  # pylint: disable=invalid-name
+):
+    """
+    Set discussions and configure cohorts for a course.
+
+    Arguments:
+        course: CourseDescriptor
+        is_cohorted (bool): Is the course cohorted?
+        auto_cohorts (list): Names of auto cohorts to create.
+        manual_cohorts (list): Names of manual cohorts to create.
+        discussion_topics (list): Discussion topic names. Picks ids and
+            sort_keys automatically.
+        cohorted_discussions: Discussion topics to cohort. Converts the
+            list to use the same ids as discussion topic names.
+        always_cohort_inline_discussions (bool): Whether inline discussions
+            should be cohorted by default.
+
+    Returns:
+        Nothing -- modifies course in place.
+    """
+    def to_id(name):
+        return topic_name_to_id(course, name)
+
+    set_course_cohort_settings(
+        course.id,
+        is_cohorted = is_cohorted,
+        cohorted_discussions = [to_id(name) for name in cohorted_discussions],
+        always_cohort_inline_discussions = always_cohort_inline_discussions
+    )
+
+    for cohort_name in auto_cohorts:
+        cohort = CohortFactory(course_id=course.id, name=cohort_name)
+        CourseCohortFactory(course_user_group=cohort, assignment_type=CourseCohort.RANDOM)
+
+    for cohort_name in manual_cohorts:
+        cohort = CohortFactory(course_id=course.id, name=cohort_name)
+        CourseCohortFactory(course_user_group=cohort, assignment_type=CourseCohort.MANUAL)
+
+    course.discussion_topics = dict((name, {"sort_key": "A", "id": to_id(name)})
+                                    for name in discussion_topics)
     try:
         # Not implemented for XMLModulestore, which is used by test_cohorts.
         modulestore().update_item(course, ModuleStoreEnum.UserID.test)
