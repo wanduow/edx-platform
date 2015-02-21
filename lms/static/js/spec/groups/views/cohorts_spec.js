@@ -283,13 +283,13 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                 it('enable/disable working correctly', function () {
                     createCohortsView(this);
 
-                    // Cohorts Enable checkbox should be unchecked as because it is default.
+                    // Cohorts Enable checkbox should be unchecked because it is default.
                     expect(cohortsView.$('.cohort-state').val()).toBeFalsy();
 
                     cohortsView.$('.cohort-state').prop('checked', true).change();
                     AjaxHelpers.expectJsonRequest(
                         requests, 'PUT', '/mock_service/cohorts/settings',
-                        createMockCohortSettings(true, [], true)
+                        createMockCohortSettings(true)
                     );
                     AjaxHelpers.respondWithJson(
                         requests,
@@ -300,7 +300,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                     cohortsView.$('.cohort-state').prop('checked', false).change();
                     AjaxHelpers.expectJsonRequest(
                         requests, 'PUT', '/mock_service/cohorts/settings',
-                        createMockCohortSettings(false, [], true)
+                        createMockCohortSettings(false)
                     );
                     AjaxHelpers.respondWithJson(
                         requests,
@@ -310,18 +310,19 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                 });
 
                 it('Course Cohort Settings Notification View renders correctly', function () {
-                     var createCohortStateMessageNotificationView = function (is_cohorted) {
-                        var cohortStateMessageNotificationView = new CourseCohortSettingsNotificationView({
+                     var createCourseCohortSettingsNotificationView = function (is_cohorted) {
+                        var notificationView = new CourseCohortSettingsNotificationView({
                             el: $('.cohort-state-message'),
                             cohortEnabled: is_cohorted});
-                        cohortStateMessageNotificationView.render();
+                        notificationView.render();
+                        return notificationView;
                      };
 
-                    createCohortStateMessageNotificationView(true);
-                    expect(cohortsView.$('.action-toggle-message').text().trim()).toBe('Cohorts Enabled');
+                    var notificationView = createCourseCohortSettingsNotificationView(true);
+                    expect(notificationView.$('.action-toggle-message').text().trim()).toBe('Cohorts Enabled');
 
-                    createCohortStateMessageNotificationView(false);
-                    expect(cohortsView.$('.action-toggle-message').text().trim()).toBe('Cohorts Disabled');
+                    notificationView = createCourseCohortSettingsNotificationView(false);
+                    expect(notificationView.$('.action-toggle-message').text().trim()).toBe('Cohorts Disabled');
                 });
 
             });
