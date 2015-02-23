@@ -4,7 +4,7 @@ Loaded by Django's settings mechanism. Consequently, this module must not
 invoke the Django armature.
 """
 
-from social.backends import google, linkedin, facebook
+from social.backends import google, linkedin, facebook, github, tumblr
 
 _DEFAULT_ICON_CLASS = 'fa-signin'
 
@@ -159,6 +159,44 @@ class FacebookOauth2(BaseProvider):
     SETTINGS = {
         'SOCIAL_AUTH_FACEBOOK_KEY': None,
         'SOCIAL_AUTH_FACEBOOK_SECRET': None,
+    }
+
+    @classmethod
+    def get_email(cls, provider_details):
+        return provider_details.get('email')
+
+    @classmethod
+    def get_name(cls, provider_details):
+        return provider_details.get('fullname')
+
+class GithubOauth2(BaseProvider):
+    """Provider for Github's Oauth2 auth system."""
+
+    BACKEND_CLASS = github.GithubOAuth2
+    ICON_CLASS = 'fa-github'
+    NAME = 'Github'
+    SETTINGS = {
+        'SOCIAL_AUTH_GITHUB_KEY': None,
+        'SOCIAL_AUTH_GITHUB_SECRET': None,
+    }
+
+    @classmethod
+    def get_email(cls, provider_details):
+        return provider_details.get('email')
+
+    @classmethod
+    def get_name(cls, provider_details):
+        return provider_details.get('fullname')
+
+class TumblrOauth(BaseProvider):
+    """Provider for Tumblr's Oauth auth system."""
+
+    BACKEND_CLASS = tumblr.TumblrOAuth
+    ICON_CLASS = 'fa-tumblr'
+    NAME = 'Tumblr'
+    SETTINGS = {
+        'SOCIAL_AUTH_TUMBLR_KEY': None,
+        'SOCIAL_AUTH_TUMBLR_SECRET': None,
     }
 
     @classmethod
