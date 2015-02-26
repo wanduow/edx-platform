@@ -188,6 +188,26 @@ class GithubOauth2(BaseProvider):
     def get_name(cls, provider_details):
         return provider_details.get('fullname')
 
+class WeiboOauth2(BaseProvider):
+    """Provider for Weibo's Oauth2 auth system."""
+
+    BACKEND_CLASS = github.WeiboOAuth2
+    ICON_CLASS = 'fa-weibo'
+    NAME = 'Weibo'
+    SETTINGS = {
+        'SOCIAL_AUTH_WEIBO_KEY': None,
+        'SOCIAL_AUTH_WEIBO_SECRET': None,
+        'SOCIAL_AUTH_WEIBO_DOMAIN_AS_USERNAME': None,
+    }
+
+    @classmethod
+    def get_email(cls, provider_details):
+        return provider_details.get('email')
+
+    @classmethod
+    def get_name(cls, provider_details):
+        return provider_details.get('fullname')
+
 class TumblrOauth(BaseProvider):
     """Provider for Tumblr's Oauth auth system."""
 
